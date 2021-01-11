@@ -38,7 +38,7 @@ class Stibium::Bundled::Bundle
   #
   # @return [Boolean]
   def locked?
-    !!gemfiles[1]
+    !!gemfiles&.fetch(1, nil)
   end
 
   # Get path to gemfile.
@@ -47,7 +47,7 @@ class Stibium::Bundled::Bundle
   #
   # @return [Pathname, nil]
   def gemfile
-    gemfiles[0]
+    gemfiles&.fetch(0, nil)
   end
 
   # Get gemfile files (gemfile + lockfile) or nothing.
