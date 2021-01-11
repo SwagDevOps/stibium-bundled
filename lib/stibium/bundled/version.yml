@@ -1,0 +1,17 @@
+---
+major: 0
+minor: 0
+patch: 1
+authors: ['Dimitri Arrigoni']
+email: 'dimitri@arrigoni.me'
+date: '2021-01-11'
+summary: 'Denote bundle state'
+description: 'Denote bundle state, based on conventions.'
+homepage: 'https://github.com/SwagDevOps/stibium-bundled'
+licenses: ['GPL-3.0']
+license_header: |
+  Copyright (C) 2020-2021 Dimitri Arrigoni <dimitri@arrigoni.me>
+  License GPLv3+: GNU GPL version 3 or later
+  <http://www.gnu.org/licenses/gpl.html>.
+  This is free software: you are free to change and redistribute it.
+  There is NO WARRANTY, to the extent permitted by law.
