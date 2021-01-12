@@ -56,6 +56,8 @@ module Stibium::Bundled
   # @!method bundled
   #   @return [Bundle, nil]
 
+  protected
+
   # @param [String, Pathname] basedir
   #
   # @return [Bundle. nil]
