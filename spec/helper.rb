@@ -11,7 +11,7 @@
   end
 
   require_relative('helper/local').tap do
-    Object.class_eval { include Local }
+    self.singleton_class.instance_eval { include Local }
   end
 
   # @formmatter:off
