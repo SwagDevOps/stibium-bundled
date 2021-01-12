@@ -49,12 +49,21 @@ module Stibium::Bundled
     VERSION: 'version',
   }.each { |k, v| autoload(k, "#{__dir__}/bundled/#{v}") }
 
-  # @!method bundled?
-  #   Denote bundle is locked or standalone.
-  #   @return [Boolean]
+  # Denote bundle is locked or standalone.
+  #
+  # @return [Boolean]
+  #
+  # @see .call
+  def bundled?
+    false
+  end
 
-  # @!method bundled
-  #   @return [Bundle, nil]
+  # @return [Bundle, nil]
+  #
+  # @see .call
+  def bundled
+    nil
+  end
 
   protected
 
