@@ -89,9 +89,7 @@ module Stibium::Bundled
           sc.define_method(:bundled?) { !bundled.nil? }
           sc.define_method(:bundled) do
             # @type [Bundle] bundle
-            # rubocop:disable Style/TernaryParentheses
-            Bundle.new(basedir).yield_self { |bundle| (bundle.locked? or bundle.standalone?) ? bundle : nil }
-            # rubocop:enable Style/TernaryParentheses
+            Bundle.new(basedir).yield_self { |bundle| bundle.bundled? ? bundle : nil }
           end
         end
       end
