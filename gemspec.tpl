@@ -4,6 +4,7 @@
 <?rb
 [
   '.yardopts',
+  'README.md',
   'lib/**/*.rb',
   'lib/**/version.yml',
 ].tap do |patterns|

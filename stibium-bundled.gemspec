@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
 
   s.files = [
     ".yardopts",
+    "README.md",
     "lib/stibium-bundled.rb",
     "lib/stibium/bundled.rb",
     "lib/stibium/bundled/bundle.rb",
