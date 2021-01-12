@@ -9,6 +9,8 @@ end
 describe Stibium::Bundled::Bundle, :'stibium/bundled/bundle' do
   let(:subject) { described_class.new(__dir__) }
 
+  it { expect(subject).to be_frozen }
+
   [:bundled?, :to_path, :locked?, :gemfile, :gemfiles, :standalone?, :standalone!].each do |method|
     it { expect(subject).to respond_to(method).with(0).arguments }
   end
