@@ -86,7 +86,7 @@ module Stibium::Bundled
       target.tap do |t|
         t.singleton_class.tap do |sc|
           sc.singleton_class.__send__(:include, self)
-          sc.define_method(:bundled?) { !bundled?.nil? }
+          sc.define_method(:bundled?) { !bundled.nil? }
           sc.define_method(:bundled) do
             # @type [Bundle] bundle
             # rubocop:disable Style/TernaryParentheses
