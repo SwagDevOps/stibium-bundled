@@ -29,13 +29,22 @@ describe Stibium::Bundled, :'stibium/bundled' do
 end
 
 # included ----------------------------------------------------------
-describe sham!(:bundled).builder.call, :'stibium/bundled' do
-  it { expect(described_class).to be_a(Stibium::Bundled) }
+sham!(:bundled).builder.tap do |builder|
+  describe builder.call, :'stibium/bundled' do
+    it { expect(described_class).to be_a(Stibium::Bundled) }
 
-  :bundled_from.tap do |method|
-    context '.methods' do
-      it { expect(described_class.methods).to include(method) }
-      it { expect(described_class.public_methods).not_to include(method) }
+    :bundled_from.tap do |method|
+      context '.methods' do
+        it { expect(described_class.methods).to include(method) }
+        it { expect(described_class.public_methods).not_to include(method) }
+      end
+
+      it do
+        # pass method public
+        described_class.clone.dup.tap do |c|
+          c.singleton_class.instance_eval { public method.to_sym }
+        end.tap { |c| expect(c).to respond_to(method).with(1).arguments }
+      end
     end
   end
 end
