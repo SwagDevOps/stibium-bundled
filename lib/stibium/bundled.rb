@@ -42,6 +42,7 @@ end
 #     end
 #   end
 # end
+# ```
 module Stibium::Bundled
   {
     Bundle: 'bundle',
