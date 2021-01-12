@@ -41,6 +41,13 @@ class Stibium::Bundled::Bundle
     !!gemfiles&.fetch(1, nil)
   end
 
+  # Denote bundle seems installed by bundler.
+  #
+  # @return [Boolean]
+  def bundled?
+    locked? or standalone?
+  end
+
   # Get path to gemfile.
   #
   # @see #gemfiles
@@ -67,7 +74,7 @@ class Stibium::Bundled::Bundle
   #
   # @return [Boolean]
   def standalone?
-    standalone_setupfile.file?
+    !!standalone_setupfile&.file?
   end
 
   # Load standalone setup if present
@@ -82,8 +89,23 @@ class Stibium::Bundled::Bundle
 
   # @see #standalone?
   #
-  # @return [Pathname]
+  # @return [Pathname, nil]
   def standalone_setupfile
-    path.join('bundle', 'bundler', 'setup.rb')
+    standalone_setupfiles.last
+  end
+
+  # @api privare
+  #
+  # @return [Array<Pathname>]
+  def standalone_setupfiles
+    Dir.glob("#{path}/**/bundler/setup.rb").map { |fp| Pathname.new(fp) }.keep_if do |file|
+      lambda do
+        return false unless file.file? and file.readable?
+
+        file.read.yield_self do |content|
+          content =~ /.*=\s*RUBY_ENGINE/ and content =~ /^\$:.unshift/
+        end
+      end.call
+    end.sort_by { |file| file.lstat.mtime }
   end
 end
