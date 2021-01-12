@@ -33,6 +33,13 @@ sham!(:bundled).builder.tap do |builder|
   describe builder.call, :'stibium/bundled' do
     it { expect(described_class).to be_a(Stibium::Bundled) }
 
+    { bundled: nil, bundled?: false }.each do |method, value|
+      it { expect(described_class).to respond_to(method).with(0).arguments }
+      context ".#{method}" do
+        it { expect(described_class.__send__(method)).to eq(value) }
+      end
+    end
+
     :bundled_from.tap do |method|
       context '.methods' do
         it { expect(described_class.methods).to include(method) }
