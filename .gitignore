@@ -9,6 +9,7 @@
 /doc/
 /tmp/
 /vendor/
+!/**/.gitkeep
 !/.env
 !/.gitignore
 !/.rspec
