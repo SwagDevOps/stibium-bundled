@@ -11,9 +11,15 @@ require_relative '../bundled'
 # Describe a bundle.
 class Stibium::Bundled::Bundle
   autoload(:Pathname, 'pathname')
+  {
+    Config: 'config',
+  }.each { |k, v| autoload(k, "#{__dir__}/bundle/#{v}") }
 
   # @return [Pathname]
   attr_reader :path
+
+  # @return [Config]
+  attr_reader :config
 
   # @param path [String, Pathname]
   #
@@ -22,6 +28,7 @@ class Stibium::Bundled::Bundle
   def initialize(path)
     self.tap do
       @path = Pathname.new(path).realpath.freeze
+      @config = Config.new(self.path).freeze
 
       raise ArgumentError, 'path is not a directory' unless self.path.directory?
     end.freeze
@@ -74,7 +81,7 @@ class Stibium::Bundled::Bundle
   #
   # @return [Boolean]
   def standalone?
-    !!standalone_setupfile&.file?
+    !!bundler_setup
   end
 
   # Load standalone setup if present
@@ -82,30 +89,29 @@ class Stibium::Bundled::Bundle
   # @return [Boolean]
   def standalone!
     # noinspection RubyResolve
-    standalone?.tap { |b| require standalone_setupfile if b }
+    standalone?.tap { |b| require bundler_setup if b }
   end
 
   protected
 
+  # Standalone setup file.
+  #
+  # ``bundle install --standalone[=<list>]`` makes a bundle that can work without depending on
+  # Rubygems or Bundler at runtime.
+  # A space separated list of groups to install has to be specified.
+  # Bundler creates a directory named ``bundle`` and installs the bundle there.
+  # It also generates a ``bundle/bundler/setup.rb`` file to replace Bundler's own setup in the manner required.
+  #
   # @see #standalone?
+  # @see #standalone!
+  # @see https://bundler.io/v2.2/man/bundle-install.1.html#OPTIONS
   #
   # @return [Pathname, nil]
-  def standalone_setupfile
-    standalone_setupfiles.last
-  end
+  def bundler_setup
+    path.join(config['BUNDLE_PATH']).join('bundler/setup.rb').yield_self do |file|
+      return nil unless file.file? and file.readable?
 
-  # @api privare
-  #
-  # @return [Array<Pathname>]
-  def standalone_setupfiles
-    Dir.glob("#{path}/**/bundler/setup.rb").map { |fp| Pathname.new(fp) }.keep_if do |file|
-      lambda do
-        return false unless file.file? and file.readable?
-
-        file.read.yield_self do |content|
-          content =~ /.*=\s*RUBY_ENGINE/ and content =~ /^\$:.unshift/
-        end
-      end.call
-    end.sort_by { |file| file.lstat.mtime }
+      file
+    end
   end
 end
