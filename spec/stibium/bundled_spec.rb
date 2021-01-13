@@ -6,7 +6,7 @@ describe Stibium::Bundled, :'stibium/bundled' do
     :Bundle,
     :VERSION,
   ].each do |k|
-    it { expect(described_class).to be_const_defined(k) }
+    it { expect(described_class).to have_constant(k) }
   end
 
   it do
