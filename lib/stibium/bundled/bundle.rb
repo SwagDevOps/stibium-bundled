@@ -108,10 +108,10 @@ class Stibium::Bundled::Bundle
   #
   # @return [Pathname, nil]
   def bundler_setup
-    path.join(config['BUNDLE_PATH']).join('bundler/setup.rb').yield_self do |file|
-      return nil unless file.file? and file.readable?
-
-      file
+    Pathname.new(config.fetch('BUNDLE_PATH')).yield_self do |bundle_path|
+      (bundle_path.absolute? ? bundle_path : path.join(bundle_path)).join('bundler/setup.rb').yield_self do |file|
+        (file.file? and file.readable?) ? file : nil # rubocop:disable Style/TernaryParentheses
+      end
     end
   end
 end
