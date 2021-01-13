@@ -8,21 +8,31 @@
 
 require_relative '../bundle'
 
-# Describe a bundle config.
+# Describe bundler configuration settings.
+#
+# Bundler loads configuration settings in this order:
+# 1. Local config (``.bundle/config`` or ``$BUNDLE_APP_CONFIG/config``)
+# 2. Environmental variables (``ENV``)
+# 3. Global config (``~/.bundle/config``) - WILL NOT be supported
+# 4. Bundler default config - PARTIAL support is implemented in ``Config.defaults``
+#
+# @see https://bundler.io/v2.2/bundle_config.html
+# @see https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development
+# @see .load
+# @see .read
+# @see .env
+# @see .defaults
+#
+# @todo Add support for ``BUNDLE_APP_CONFIG`` env variable
 class Stibium::Bundled::Bundle::Config < ::Hash
-  autoload(:Pathname, 'pathname')
-  autoload(:YAML, 'yaml')
-
   # @param basedir [String, Pathname]
   # @param filepath [String]
-  def initialize(basedir, filepath: '.bundle/config')
+  def initialize(basedir, filepath: '.bundle/config', env: ENV.to_h.dup)
     super().tap do
       @file = Pathname.new(basedir).join(filepath || '').expand_path.freeze
+      @env = self.class.__send__(:env, source: env).freeze
 
-      self.class.__send__(:read, file)
-          .yield_self { |result| self.class.defaults.merge(result) }
-          .sort
-          .each { |k, v| self[k.freeze] = v.freeze }
+      self.class.__send__(:load, self.file, env: self.env).each { |k, v| self[k.freeze] = v.freeze }
     end.freeze
   end
 
@@ -46,17 +56,23 @@ class Stibium::Bundled::Bundle::Config < ::Hash
     file.readable?
   end
 
+  # @return [Hash{String => Object}]
+  attr_reader :env
+
   protected
 
   # @return [Pathname]
   attr_reader :file
 
   class << self
+    autoload(:Pathname, 'pathname')
+    autoload(:YAML, 'yaml')
+
     # Default config values (as seen from an empty environment).
     #
     # ```shell
     # rm -rfv ~/.bundle/config .bundle/config
-    # bundle install --standalone
+    # env -i $(which bundle) install --standalone
     # cat .bundle/config
     # ```
     #
@@ -68,6 +84,30 @@ class Stibium::Bundled::Bundle::Config < ::Hash
     end
 
     protected
+
+    # Load config.
+    #
+    # @param file [Pathname]
+    # @param env [Hash{String => String}]
+    #
+    # @api private
+    #
+    # @return [Hash{String => Object}]
+    def load(file, env: ENV.to_h.dup)
+      self.read(file).yield_self { |result| self.env(source: env.dup).merge(self.defaults).merge(result) }.sort.to_h
+    end
+
+    # @param source [Hash{String => String}]
+    #
+    # @api private
+    #
+    # @return [Hash{String => Object}]
+    def env(source: ENV.to_h.dup)
+      source.keep_if { |k, _| /^BUNDLE_/ =~ k }
+            .transform_keys(&:freeze)
+            .transform_values { |v| (v.is_a?(String) ? YAML.safe_load(v) : v).freeze }
+            .sort.to_h
+    end
 
     # Read given config file.
     #
