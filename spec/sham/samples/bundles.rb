@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 lister = lambda do
-  Dir.glob("#{SAMPLES_PATH}/*")
+  Dir.glob("#{SAMPLES_PATH}/bundles/*")
      .map { |fp| Pathname.new(fp) }
      .keep_if(&:directory?)
      .map { |fp| [fp.basename.to_s.to_sym, fp] }

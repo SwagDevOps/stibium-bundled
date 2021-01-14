@@ -60,7 +60,7 @@ sham!(:bundled).builder.tap do |builder|
 end
 
 # samples -----------------------------------------------------------
-sham!(:samples).lister.call.map { |k, _| [k, sham!(:samples).builder.call(k)] }.to_h.each do |_, c|
+sham!(:'samples/bundles').lister.call.map { |k, _| [k, sham!(:'samples/bundles').builder.call(k)] }.to_h.each do |_, c|
   describe c, :'stibium/bundled', :samples do
     it { expect(described_class).to be_a(Stibium::Bundled) }
 
@@ -84,7 +84,7 @@ end
   partial_old: [FalseClass, NilClass],
   standalone: [TrueClass, Stibium::Bundled::Bundle]
 }.sort.each do |name, types|
-  sham!(:samples).builder.call(name).tap do |c|
+  sham!(:'samples/bundles').builder.call(name).tap do |c|
     describe c, :'stibium/bundled', :samples do
       context '.bundled?' do
         it { expect(described_class.bundled?).to be_a(types.fetch(0)) }
