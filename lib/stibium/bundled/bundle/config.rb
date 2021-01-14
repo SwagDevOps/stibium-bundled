@@ -28,49 +28,27 @@ class Stibium::Bundled::Bundle::Config < ::Hash
 
   # @param basedir [String, Pathname]
   # @param env [Hash{String => String}]
-  def initialize(basedir, env: ENV.to_h.dup)
+  def initialize(basedir, env: ENV.to_h)
     super().tap do
+      @basedir = Pathname.new(basedir).freeze
       @env = self.class.__send__(:env, source: env).freeze
-      @file = Pathname.new(basedir).yield_self { |path| self.resolve_file(path) }
 
-      self.class.__send__(:load, self.file, env: env).each { |k, v| self[k.freeze] = v.freeze }
+      self.class.__send__(:load, self.resolve_file, env: env).each { |k, v| self[k.freeze] = v.freeze }
     end.freeze
-  end
-
-  # @return [String]
-  def to_path
-    file.to_path
-  end
-
-  # @return [Boolean]
-  def exist?
-    file.exist?
-  end
-
-  # @return [Boolean]
-  def file?
-    file.file?
-  end
-
-  # @return [Boolean]
-  def readable?
-    file.readable?
   end
 
   # @return [Hash{String => Object}]
   attr_reader :env
 
-  protected
-
   # @return [Pathname]
-  attr_reader :file
+  attr_reader :basedir
+
+  protected
 
   # Resolve path to local config (depending on ``BUNDLE_APP_CONFIG`` value).
   #
-  # @param basedir [Pathname]
-  #
   # @return [Pathname]
-  def resolve_file(basedir)
+  def resolve_file
     self.env.fetch('BUNDLE_APP_CONFIG', '.bundle').yield_self { |s| Pathname.new(s) }.yield_self do |path|
       (path.absolute? ? path : basedir.join(path)).join('config')
     end
@@ -106,13 +84,13 @@ class Stibium::Bundled::Bundle::Config < ::Hash
     # @see https://bundler.io/v2.2/bundle_config.html
     #
     # @return [Hash{String => Object}]
-    def load(file, env: ENV.to_h.dup)
+    def load(file, env: ENV.to_h)
       # @formatter:off
       self.defaults                                # 4. Bundler default config
           .merge(self.global_config(env: env.dup)) # 3. Global config
           .merge(self.env(source: env.dup))        # 2. Environmental variables
           .merge(self.read(file))                  # 1. Local config
-          .sort.to_h
+          .sort.map { |k, v| [k.freeze, v.freeze] }.to_h.freeze
       # @formatter:on
     end
 
@@ -123,7 +101,7 @@ class Stibium::Bundled::Bundle::Config < ::Hash
     # @param env [Hash{String => String}]
     #
     # @return [Hash{String => Object}]
-    def global_config(env: ENV.to_h.dup)
+    def global_config(env: ENV.to_h)
       env['HOME'].yield_self do |home_path|
         return {} if home_path.nil?
 
@@ -140,7 +118,7 @@ class Stibium::Bundled::Bundle::Config < ::Hash
     # @api private
     #
     # @return [Hash{String => Object}]
-    def env(source: ENV.to_h.dup)
+    def env(source: ENV.to_h)
       source.dup.keep_if { |k, _| /^BUNDLE_.+/ =~ k }
             .transform_keys(&:freeze)
             .transform_values { |v| (v.is_a?(String) ? YAML.safe_load(v) : v).freeze }
