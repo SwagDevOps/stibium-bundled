@@ -67,12 +67,13 @@ module Stibium::Bundled
 
   protected
 
-  # @param [String, Pathname] basedir
+  # @param basedir [String, Pathname]
+  # @param env [Hash{String => String}]
   #
   # @return [Bundle. nil]
-  def bundled_from(basedir)
+  def bundled_from(basedir, env: ENV.to_h)
     Stibium::Bundled
-      .call(self, basedir: basedir)
+      .call(self, basedir: basedir, env: env)
       .bundled
       .tap { |bundle| yield(bundle) if block_given? and bundle }
   end
@@ -80,16 +81,17 @@ module Stibium::Bundled
   class << self
     # @param target [Class, Module]
     # @param basedir [String, Pathname]
+    # @param env [Hash{String => String}]
     #
     # @return [Class, Module]
-    def call(target, basedir:)
+    def call(target, basedir:, env: ENV.to_h)
       target.tap do |t|
         t.singleton_class.tap do |sc|
           sc.singleton_class.__send__(:include, self)
           sc.define_method(:bundled?) { !bundled.nil? }
           sc.define_method(:bundled) do
             # @type [Bundle] bundle
-            Bundle.new(basedir).yield_self { |bundle| bundle.bundled? ? bundle : nil }
+            Bundle.new(basedir, env: env).yield_self { |bundle| bundle.bundled? ? bundle : nil }
           end
         end
       end
