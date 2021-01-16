@@ -55,14 +55,17 @@ sham!(:'samples/configs').lister.call.tap do |samples|
       empty: defaults,
       local: defaults.merge({ 'BUNDLE_FOO' => 'bar' }),
     }
-  end.sort.to_h.freeze.each do |sample_name, expected|
-    # @type [Class<Stibium::Bundled::Bundle::Config>] described_class
-    # @type [Stibium::Bundled::Bundle::Config] subject
-    describe Stibium::Bundled::Bundle::Config, :'stibium/bundled/bundle/config', :samples do
-      let(:sample) { samples.fetch(sample_name) }
-      let(:subject) { described_class.new(sample.basedir, env: sample.env) }
+  end.sort.to_h.transform_values(&:freeze).freeze.each do |sample_name, expected|
+    samples.fetch(sample_name).tap do |sample|
+      # @type [Class<Stibium::Bundled::Bundle::Config>] described_class
+      # @type [Stibium::Bundled::Bundle::Config] subject
+      describe Stibium::Bundled::Bundle::Config, :'stibium/bundled/bundle/config', :samples do
+        let(:subject) { described_class.new(sample.basedir, env: sample.env) }
 
-      it { expect(subject).to eq(expected) }
+        context ".new(#{sample.basedir.to_s.inspect})" do
+          it { expect(subject).to eq(expected) }
+        end
+      end
     end
   end
 end
