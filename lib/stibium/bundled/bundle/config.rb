@@ -17,6 +17,8 @@ require_relative '../bundle'
 # 3. Global config (``~/.bundle/config``)
 # 4. Bundler default config - PARTIAL support is implemented in ``Config.defaults``
 #
+# @note Executing bundle with the ``BUNDLE_IGNORE_CONFIG`` environment set will cause it to ignore all configuration.
+#
 # @see https://bundler.io/v2.2/bundle_config.html
 # @see https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development
 # @see .load
@@ -33,7 +35,7 @@ class Stibium::Bundled::Bundle::Config < ::Hash
       @basedir = Pathname.new(basedir).freeze
       @env = self.class.__send__(:env, source: env).freeze
 
-      self.class.__send__(:load, self.resolve_file, env: env).each { |k, v| self[k.freeze] = v.freeze }
+      self.class.__send__(:call, self.resolve_file, env: env).each { |k, v| self[k.freeze] = v.freeze }
     end.freeze
   end
 
@@ -49,7 +51,13 @@ class Stibium::Bundled::Bundle::Config < ::Hash
   #
   # @return [Pathname]
   def resolve_file
-    self.env.fetch('BUNDLE_APP_CONFIG', '.bundle').yield_self { |s| Pathname.new(s) }.yield_self do |path|
+    begin
+      'BUNDLE_APP_CONFIG'.yield_self do |k|
+        self.env.fetch(k) { self.class.defaults.fetch(k) }
+      end
+    end.yield_self do |s|
+      Pathname.new(s)
+    end.yield_self do |path|
       (path.absolute? ? path : basedir.join(path)).join('config')
     end
   end
@@ -69,6 +77,7 @@ class Stibium::Bundled::Bundle::Config < ::Hash
     # @see Stibium::Bundled::Bundle#bundler_setup
     def defaults
       {
+        'BUNDLE_APP_CONFIG' => '.bundle',
         'BUNDLE_PATH' => 'bundle',
       }
     end
@@ -84,12 +93,12 @@ class Stibium::Bundled::Bundle::Config < ::Hash
     # @see https://bundler.io/v2.2/bundle_config.html
     #
     # @return [Hash{String => Object}]
-    def load(file, env: ENV.to_h)
+    def call(file, env: ENV.to_h)
       # @formatter:off
-      self.defaults                                # 4. Bundler default config
-          .merge(self.global_config(env: env.dup)) # 3. Global config
-          .merge(self.env(source: env.dup))        # 2. Environmental variables
-          .merge(self.read(file))                  # 1. Local config
+      self.defaults                            # 4. Bundler default config
+          .merge(self.global_config(env: env)) # 3. Global config
+          .merge(self.env(source: env))        # 2. Environmental variables
+          .merge(self.read(file, env: env))    # 1. Local config
           .sort.map { |k, v| [k.freeze, v.freeze] }.to_h.freeze
       # @formatter:on
     end
@@ -106,7 +115,7 @@ class Stibium::Bundled::Bundle::Config < ::Hash
         return {} if home_path.nil?
 
         Pathname.new(home_path).expand_path.join('.bundle/config').yield_self do |file|
-          self.read(file)
+          self.read(file, env: env)
         end
       end
     end
@@ -130,9 +139,12 @@ class Stibium::Bundled::Bundle::Config < ::Hash
     # @api private
     #
     # @param file [Pathname]
+    # @param env [Hash{String => String}]
     #
     # @return [Hash{String => Object}]
-    def read(file)
+    def read(file, env: ENV.to_h)
+      return {} if env(source: env).key?('BUNDLE_IGNORE_CONFIG')
+
       return {} unless file.file? and file.readable?
 
       (file.read.yield_self { |content| YAML.safe_load(content) })
