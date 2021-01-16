@@ -7,6 +7,17 @@ describe Stibium::Bundled::Bundle::Config, :'stibium/bundled/bundle/config' do
     it { expect(described_class).to respond_to(method).with(1).arguments }
     it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:env) }
   end
+
+  context '.defaults' do
+    let(:expected) do
+      {
+        'BUNDLE_APP_CONFIG' => '.bundle',
+        'BUNDLE_PATH' => 'bundle'
+      }
+    end
+
+    it { expect(described_class.defaults).to eq(expected) }
+  end
 end
 
 # attributes --------------------------------------------------------
