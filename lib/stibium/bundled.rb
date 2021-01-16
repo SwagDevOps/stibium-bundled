@@ -49,6 +49,19 @@ module Stibium::Bundled
     VERSION: 'version',
   }.each { |k, v| autoload(k, "#{__dir__}/bundled/#{v}") }
 
+  class << self
+    private
+
+    # Callback invoked whenever the receiver is included in another module or class.
+    #
+    # @param [Class, Module] othermod
+    #
+    # @see https://ruby-doc.org/core-2.5.3/Module.html#method-i-included
+    def included(othermod)
+      othermod.singleton_class.__send__(:include, self) unless othermod.singleton_class?
+    end
+  end
+
   # Denote bundle is locked or standalone.
   #
   # @return [Boolean]
