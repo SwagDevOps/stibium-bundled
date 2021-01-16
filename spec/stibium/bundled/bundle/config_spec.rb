@@ -46,26 +46,15 @@ describe Stibium::Bundled::Bundle::Config, :'stibium/bundled/bundle/config' do
 end
 
 # samples -----------------------------------------------------------
-sham!(:'samples/configs').lister.call.tap do |samples|
-  {
-    'BUNDLE_APP_CONFIG' => '.bundle',
-    'BUNDLE_PATH' => 'bundle'
-  }.map { |k, v| [k.freeze, v.freeze] }.to_h.yield_self do |defaults|
-    {
-      empty: defaults,
-      local: defaults.merge({ 'BUNDLE_FOO' => 'bar' }),
-    }
-  end.sort.to_h.transform_values(&:freeze).freeze.each do |sample_name, expected|
-    samples.fetch(sample_name).tap do |sample|
-      # @type [Class<Stibium::Bundled::Bundle::Config>] described_class
-      # @type [Stibium::Bundled::Bundle::Config] subject
-      describe Stibium::Bundled::Bundle::Config, :'stibium/bundled/bundle/config', :samples do
-        let(:subject) { described_class.new(sample.basedir, env: sample.env) }
+sham!(:'samples/configs').lister.call.each do |_, sample|
+  # @type [Class<Stibium::Bundled::Bundle::Config>] described_class
+  # @type [Stibium::Bundled::Bundle::Config] subject
+  describe Stibium::Bundled::Bundle::Config, :'stibium/bundled/bundle/config', :samples do
+    let(:subject) { described_class.new(sample.basedir, env: sample.env) }
+    let(:expected) { sample.result }
 
-        context ".new(#{sample.basedir.to_s.inspect})" do
-          it { expect(subject).to eq(expected) }
-        end
-      end
+    context ".new(#{sample.basedir.to_s.inspect}, env: #{sample.env})" do
+      it { expect(subject).to eq(expected) }
     end
   end
 end
