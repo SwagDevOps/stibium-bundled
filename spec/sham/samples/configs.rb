@@ -10,6 +10,7 @@ results = {
     empty: defaults,
     local: defaults.merge({ 'BUNDLE_FOO' => 'bar' }),
     ignored: defaults.merge({ 'BUNDLE_IGNORE_CONFIG' => true }),
+    global: defaults.merge({ 'BUNDLE_FOO' => 'bar', 'BUNDLE_ANSWER' => 42 }),
   }
 end.transform_values(&:freeze).freeze
 

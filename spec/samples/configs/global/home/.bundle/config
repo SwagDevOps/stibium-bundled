@@ -1,0 +1,4 @@
+# -*- mode: yaml -*-
+---
+BUNDLE_FOO: bar
+BUNDLE_ANSWER: 42
