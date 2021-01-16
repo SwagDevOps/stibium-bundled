@@ -25,10 +25,10 @@ class Stibium::Bundled::Bundle
   #
   # @raise [Errno::ENOENT]
   # @raise [ArgumentError] when given ``path`` is not a directory.
-  def initialize(path)
+  def initialize(path, env: ENV.to_h)
     self.tap do
       @path = Pathname.new(path).realpath.freeze
-      @config = Config.new(self.path).freeze
+      @config = Config.new(self.path, env: env).freeze
 
       raise ArgumentError, 'path is not a directory' unless self.path.directory?
     end.freeze
