@@ -6,9 +6,7 @@
 require 'stibium/bundled'
 
 module AwesomeGem
-  class << self
-    include(Stibium::Bundled)
-  end
+  include(Stibium::Bundled)
 
   self.bundled_from("#{__dir__}/..") do |bundle|
     unless bundle.standalone!
