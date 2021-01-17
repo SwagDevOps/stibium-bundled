@@ -62,15 +62,7 @@ sham!(:bundled).builder.tap do |builder|
 end
 
 sham!(:bundled).builder.tap do |builder|
-  builder.call.tap do |c|
-    # rubocop:disable Lint/UselessMethodDefinition
-    c.instance_eval do
-      def bundled_from(*args, **kwargs)
-        super(*args, **kwargs)
-      end
-    end
-    # rubocop:enable Lint/UselessMethodDefinition
-  end.tap do |altered_class|
+  builder.call.tap { |c| c.singleton_class.__send__(:public, :bundled_from) }.tap do |altered_class|
     describe altered_class, :'stibium/bundled' do
       :bundled_from.tap do |method|
         it { expect(described_class).to respond_to(method).with(1).arguments }
