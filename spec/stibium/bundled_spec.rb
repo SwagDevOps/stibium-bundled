@@ -81,38 +81,25 @@ sham!(:bundled).builder.tap do |builder|
 end
 
 # samples -----------------------------------------------------------
-sham!(:'samples/bundles').lister.call.map { |k, _| [k, sham!(:'samples/bundles').builder.call(k)] }.to_h.each do |_, c|
-  describe c, :'stibium/bundled', :samples do
+sham!(:'samples/bundles').lister.call.each do |_, sample|
+  describe sample.builder.call, :'stibium/bundled', :samples do
     it { expect(described_class).to be_a(Stibium::Bundled) }
 
-    { bundled: [NilClass, Stibium::Bundled::Bundle], bundled?: [TrueClass, FalseClass] }.each do |method, types|
-      it { expect(described_class).to respond_to(method).with(0).arguments }
+    context ".bundled_from(#{sample.basedir.to_s.inspect})" do
+      { bundled: [NilClass, Stibium::Bundled::Bundle], bundled?: [TrueClass, FalseClass] }.each do |method, types|
+        it { expect(described_class).to respond_to(method).with(0).arguments }
 
-      context ".#{method}.class" do
-        it do
-          expect(described_class.__send__(method).class).to satisfy("be in #{types}") { |x| types.include?(x) }
+        context ".#{method}" do
+          it do
+            expect(described_class.__send__(method).class).to satisfy("be in #{types}") { |x| types.include?(x) }
+          end
         end
       end
-    end
-  end
-end
 
-{
-  empty: [FalseClass, NilClass],
-  gemfile: [TrueClass, Stibium::Bundled::Bundle],
-  gemfile_old: [TrueClass, Stibium::Bundled::Bundle],
-  partial: [FalseClass, NilClass],
-  partial_old: [FalseClass, NilClass],
-  standalone: [TrueClass, Stibium::Bundled::Bundle]
-}.sort.each do |name, types|
-  sham!(:'samples/bundles').builder.call(name).tap do |c|
-    describe c, :'stibium/bundled', :samples do
-      context '.bundled?' do
-        it { expect(described_class.bundled?).to be_a(types.fetch(0)) }
-      end
-
-      context '.bundled' do
-        it { expect(described_class.bundled).to be_a(types.fetch(1)) }
+      { bundled: 1, bundled?: 0 }.each do |method, index|
+        context ".#{method}" do
+          it { expect(described_class.public_send(method)).to be_a(sample.results.fetch(index)) }
+        end
       end
     end
   end
