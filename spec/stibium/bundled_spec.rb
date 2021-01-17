@@ -83,9 +83,9 @@ end
 # samples -----------------------------------------------------------
 sham!(:'samples/bundles').lister.call.each do |_, sample|
   describe sample.builder.call, :'stibium/bundled', :samples do
-    it { expect(described_class).to be_a(Stibium::Bundled) }
-
     context ".bundled_from(#{sample.basedir.to_s.inspect})" do
+      it { expect(described_class).to be_a(Stibium::Bundled) }
+
       { bundled: [NilClass, Stibium::Bundled::Bundle], bundled?: [TrueClass, FalseClass] }.each do |method, types|
         it { expect(described_class).to respond_to(method).with(0).arguments }
 
