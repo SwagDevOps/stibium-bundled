@@ -24,7 +24,9 @@ end
 describe Stibium::Bundled, :'stibium/bundled' do
   :call.tap do |method|
     it { expect(described_class).to respond_to(method) }
+    # keywords
     it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:basedir) }
+    it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:basedir, :env) }
   end
 end
 
@@ -54,6 +56,25 @@ sham!(:bundled).builder.tap do |builder|
         described_class.clone.dup.tap do |c|
           c.singleton_class.instance_eval { public method.to_sym }
         end.tap { |c| expect(c).to respond_to(method).with(1).arguments }
+      end
+    end
+  end
+end
+
+sham!(:bundled).builder.tap do |builder|
+  builder.call.tap do |c|
+    # rubocop:disable Lint/UselessMethodDefinition
+    c.instance_eval do
+      def bundled_from(*args, **kwargs)
+        super(*args, **kwargs)
+      end
+    end
+    # rubocop:enable Lint/UselessMethodDefinition
+  end.tap do |altered_class|
+    describe altered_class, :'stibium/bundled' do
+      :bundled_from.tap do |method|
+        it { expect(described_class).to respond_to(method).with(1).arguments }
+        it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:env) }
       end
     end
   end
