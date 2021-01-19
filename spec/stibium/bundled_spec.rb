@@ -66,6 +66,7 @@ sham!(:bundled).builder.tap do |builder|
     describe altered_class, :'stibium/bundled' do
       :bundled_from.tap do |method|
         it { expect(described_class).to respond_to(method).with(1).arguments }
+        it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:setup) }
         it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:env) }
       end
     end
