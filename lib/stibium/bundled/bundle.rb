@@ -84,12 +84,32 @@ class Stibium::Bundled::Bundle
     !!bundler_setup
   end
 
-  # Load standalone setup if present
+  # Load standalone setup if present.
   #
-  # @return [Boolean]
-  def standalone!
-    # noinspection RubyResolve
-    standalone?.tap { |b| require bundler_setup if b }
+  # @return [self]
+  # @raise [Errno::ENOENT, TypeError]
+  def standalone!(&fallback)
+    self.tap do
+      # noinspection RubyResolve
+      require bundler_setup&.realpath
+    rescue Errno::ENOENT, TypeError => e
+      fallback ? fallback.call(self) : raise(e)
+    end
+  end
+
+  # Load standalone setup if present, else fallback to ``bundler/setup`` when locked.
+  #
+  # @return [self]
+  #
+  # @raise [LoadError]
+  #
+  # @see https://bundler.io/v1.5/bundler_setup.html
+  # @see https://github.com/ruby/ruby/blob/0e40cc9b194a5e46024d32b85a61e651372a65cb/lib/bundler.rb#L139
+  # @see https://github.com/ruby/ruby/blob/0e40cc9b194a5e46024d32b85a61e651372a65cb/lib/bundler/setup.rb
+  # @see https://github.com/ruby/ruby/blob/69ed64949b0c02d4b195809fa104ff23dd100093/lib/bundler.rb#L11
+  # @see https://github.com/ruby/ruby/blob/69ed64949b0c02d4b195809fa104ff23dd100093/lib/bundler/rubygems_integration.rb
+  def setup
+    self.standalone! { require 'bundler/setup' if self.locked? }.yield_self { self }
   end
 
   protected
