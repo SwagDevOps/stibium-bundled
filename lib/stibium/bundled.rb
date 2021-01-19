@@ -20,9 +20,7 @@ end
 #   Stibium::Bundled.call(self, basedir: "#{__dir__}/..")
 #
 #   bundled&.tap do |bundle|
-#     unless bundle.standalone!
-#         require 'bundler/setup' if bundle.locked?
-#     end
+#     bundle.standalone! { require 'bundler/setup' if bundle.locked? }
 #   end
 # end
 # ```
@@ -32,15 +30,24 @@ end
 # ```ruby
 # # file: lib/awesome_gem.rb
 # module AwesomeGem
-#   class << self
-#     include(Stibium::Bundled)
-#   end
+#   include(Stibium::Bundled)
 #
 #   self.bundled_from("#{__dir__}/..") do |bundle|
 #     unless bundle.standalone!
 #       require 'bundler/setup' if bundle.locked?
 #     end
 #   end
+# end
+# ```
+#
+# or simpler:
+#
+# ```ruby
+# # file: lib/awesome_gem.rb
+# module AwesomeGem
+#   include(Stibium::Bundled)
+#
+#   self.bundled_from("#{__dir__}/..", setup: true)
 # end
 # ```
 module Stibium::Bundled
@@ -81,14 +88,18 @@ module Stibium::Bundled
   protected
 
   # @param basedir [String, Pathname]
+  # @param setup [Boolean]
   # @param env [Hash{String => String}]
   #
   # @return [Bundle. nil]
-  def bundled_from(basedir, env: ENV.to_h)
-    Stibium::Bundled
-      .call(self, basedir: basedir, env: env)
-      .bundled
-      .tap { |bundle| yield(bundle) if block_given? and bundle }
+  def bundled_from(basedir, setup: false, env: ENV.to_h)
+    Stibium::Bundled.call(self, basedir: basedir, env: env).bundled.tap do |bundle|
+      unless bundle.nil?
+        bundle.setup if setup.is_a?(TrueClass)
+
+        yield(bundle) if block_given?
+      end
+    end
   end
 
   class << self
