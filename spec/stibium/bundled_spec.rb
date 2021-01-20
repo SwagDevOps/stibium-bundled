@@ -24,9 +24,10 @@ end
 describe Stibium::Bundled, :'stibium/bundled' do
   :call.tap do |method|
     it { expect(described_class).to respond_to(method) }
-    # keywords
     it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:basedir) }
-    it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:basedir, :env) }
+    [:env, :ruby_config].each do |keyword|
+      it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:basedir, keyword) }
+    end
   end
 end
 
@@ -50,12 +51,20 @@ sham!(:bundled).builder.tap do |builder|
       context '.public_methods' do
         it { expect(described_class.public_methods).not_to include(method) }
       end
+    end
+  end
+end
 
-      it do
-        # pass method public
-        described_class.clone.dup.tap do |c|
-          c.singleton_class.instance_eval { public method.to_sym }
-        end.tap { |c| expect(c).to respond_to(method).with(1).arguments }
+sham!(:bundled).builder.tap do |builder|
+  describe builder.call, :'stibium/bundled' do
+    :bundled_from.tap do |method|
+      let(:altered_class) do
+        described_class.tap { |c| c.singleton_class.__send__(:public, method) }
+      end
+
+      it { expect(altered_class).to respond_to(method).with(1).arguments }
+      [:setup, :env, :ruby_config].each do |keyword|
+        it { expect(altered_class).to respond_to(method).with(1).arguments.with_keywords(keyword) }
       end
     end
   end
@@ -66,8 +75,9 @@ sham!(:bundled).builder.tap do |builder|
     describe altered_class, :'stibium/bundled' do
       :bundled_from.tap do |method|
         it { expect(described_class).to respond_to(method).with(1).arguments }
-        it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:setup) }
-        it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(:env) }
+        [:setup, :env, :ruby_config].each do |keyword|
+          it { expect(described_class).to respond_to(method).with(1).arguments.with_keywords(keyword) }
+        end
       end
     end
   end
