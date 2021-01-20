@@ -4,6 +4,7 @@
 describe Stibium::Bundled::Bundle, :'stibium/bundled/bundle' do
   [
     :Config,
+    :Directory,
   ].each do |k|
     it { expect(described_class).to have_constant(k) }
   end
@@ -12,7 +13,12 @@ end
 # class methods -----------------------------------------------------
 describe Stibium::Bundled::Bundle, :'stibium/bundled/bundle' do
   # @type [Class<Stibium::Bundled::Bundle]>] described_class
-  it { expect(described_class).to respond_to(:new).with(1).arguments }
+  :new.tap do |method|
+    it { expect(described_class).to respond_to(method).with(1).arguments }
+    [:env, :ruby_config].each do |keyword|
+      it { expect(described_class).to respond_to(method).with(1).with_keywords(keyword) }
+    end
+  end
 end
 
 # instance methods --------------------------------------------------
@@ -23,16 +29,20 @@ describe Stibium::Bundled::Bundle, :'stibium/bundled/bundle' do
   let(:basedir) { __dir__ }
   let(:subject) { described_class.new(basedir) }
 
-  [:bundled?,
-   :to_path,
-   :locked?,
-   :gemfile,
-   :gemfiles,
-   :standalone?,
-   :standalone!,
-   :config,].each do |method|
-     it { expect(subject).to respond_to(method).with(0).arguments }
-   end
+  [
+    :bundled?,
+    :to_path,
+    :locked?,
+    :gemfile,
+    :gemfiles,
+    :standalone?,
+    :standalone!,
+    :specifications,
+    :installed?,
+    :config,
+  ].each do |method|
+    it { expect(subject).to respond_to(method).with(0).arguments }
+  end
 end
 
 # tests -------------------------------------------------------------
