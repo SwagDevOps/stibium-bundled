@@ -13,7 +13,7 @@ require_relative '../bundle'
 # Bundler loads configuration settings in this order:
 #
 # 1. Local config (``.bundle/config`` or ``$BUNDLE_APP_CONFIG/config``)
-# 2. Environmental variables (``ENV``)
+# 2. Environment variables (``ENV``)
 # 3. Global config (``~/.bundle/config``)
 # 4. Bundler default config - PARTIAL support is implemented in ``Config.defaults``
 #
