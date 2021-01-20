@@ -11,8 +11,11 @@ require_relative '../bundled'
 # Describe a bundle.
 class Stibium::Bundled::Bundle
   autoload(:Pathname, 'pathname')
+  autoload(:Gem, 'rubygems') # @see .specifications
+
   {
     Config: 'config',
+    Directory: 'directory',
   }.each { |k, v| autoload(k, "#{__dir__}/bundle/#{v}") }
 
   # @return [Pathname]
@@ -21,16 +24,26 @@ class Stibium::Bundled::Bundle
   # @return [Config]
   attr_reader :config
 
+  # @retrun [Directory]
+  attr_reader :directory
+
   # @param path [String, Pathname]
+  # @param env [Hash{String => String}]
+  # @param ruby_config [Hash{Symbol => Object}]
   #
   # @raise [Errno::ENOENT]
   # @raise [ArgumentError] when given ``path`` is not a directory.
-  def initialize(path, env: ENV.to_h)
+  def initialize(path, env: ENV.to_h, ruby_config: {})
     self.tap do
-      @path = Pathname.new(path).realpath.freeze
-      @config = Config.new(self.path, env: env).freeze
+      (@path = Pathname.new(path).realpath.freeze).tap do |base_path|
+        raise ArgumentError, 'path is not a directory' unless base_path.directory?
+      end
 
-      raise ArgumentError, 'path is not a directory' unless self.path.directory?
+      (@config = Config.new(self.path, env: env).freeze).tap do |config|
+        Pathname.new(config.fetch('BUNDLE_PATH')).expand_path.tap do |directory_path|
+          @directory = Directory.new(directory_path, ruby_config: ruby_config)
+        end
+      end
     end.freeze
   end
 
@@ -46,6 +59,22 @@ class Stibium::Bundled::Bundle
   # @return [Boolean]
   def locked?
     !!gemfiles&.fetch(1, nil)
+  end
+
+  # Get specifications.
+  #
+  # @see https://docs.ruby-lang.org/en/3.0.0/Gem/Specification.html
+  #
+  # @return [Array<Gem::Specification>]
+  def specifications
+    directory.specifications.map { |file| instance_eval(file.read, file.to_path) }
+  end
+
+  # Denote install seems to be happened (since specifications are present).
+  #
+  # @return [Boolean]
+  def installed?
+    !directory.specifications.empty?
   end
 
   # Denote bundle seems installed by bundler.

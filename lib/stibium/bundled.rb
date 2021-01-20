@@ -90,10 +90,11 @@ module Stibium::Bundled
   # @param basedir [String, Pathname]
   # @param setup [Boolean]
   # @param env [Hash{String => String}]
+  # @param ruby_config [Hash{Symbol => Object}]
   #
   # @return [Bundle. nil]
-  def bundled_from(basedir, setup: false, env: ENV.to_h)
-    Stibium::Bundled.call(self, basedir: basedir, env: env).bundled.tap do |bundle|
+  def bundled_from(basedir, setup: false, env: ENV.to_h, ruby_config: {})
+    Stibium::Bundled.call(self, basedir: basedir, env: env, ruby_config: ruby_config).bundled.tap do |bundle|
       unless bundle.nil?
         bundle.setup if setup.is_a?(TrueClass)
 
@@ -106,16 +107,18 @@ module Stibium::Bundled
     # @param target [Class, Module]
     # @param basedir [String, Pathname]
     # @param env [Hash{String => String}]
+    # @param ruby_config [Hash{Symbol => Object}]
     #
     # @return [Class, Module]
-    def call(target, basedir:, env: ENV.to_h)
+    def call(target, basedir:, env: ENV.to_h, ruby_config: {})
       target.tap do |t|
         t.singleton_class.tap do |sc|
           sc.singleton_class.__send__(:include, self)
           sc.define_method(:bundled?) { !bundled.nil? }
           sc.define_method(:bundled) do
             # @type [Bundle] bundle
-            Bundle.new(basedir, env: env).yield_self { |bundle| bundle.bundled? ? bundle : nil }
+            Bundle.new(basedir, env: env, ruby_config: ruby_config)
+                  .yield_self { |bundle| bundle.bundled? ? bundle : nil }
           end
         end
       end
