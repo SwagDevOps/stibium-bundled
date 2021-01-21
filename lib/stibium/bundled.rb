@@ -109,7 +109,7 @@ module Stibium::Bundled
     # @param env [Hash{String => String}]
     # @param ruby_config [Hash{Symbol => Object}]
     #
-    # @return [Class, Module]
+    # @return [Class, Module] given ``Class`` or ``Module``
     def call(target, basedir:, env: ENV.to_h, ruby_config: {})
       target.tap do |t|
         t.singleton_class.tap do |sc|
