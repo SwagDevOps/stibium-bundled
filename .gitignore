@@ -5,9 +5,11 @@
 /.*
 /build/
 /cache/
+/coverage/
 /doc/
 /tmp/
 /vendor/
+!/**/.gitkeep
 !/.env
 !/.gitignore
 !/.rspec

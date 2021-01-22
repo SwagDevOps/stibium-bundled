@@ -4,8 +4,8 @@
 
 Gem::Specification.new do |s|
   s.name        = "stibium-bundled"
-  s.version     = "0.0.2"
-  s.date        = "2021-01-11"
+  s.version     = "0.0.3"
+  s.date        = "2021-01-22"
   s.summary     = "Denote bundle state"
   s.description = "Denote bundle state, based on conventions."
 
@@ -22,9 +22,12 @@ Gem::Specification.new do |s|
 
   s.files = [
     ".yardopts",
+    "README.md",
     "lib/stibium-bundled.rb",
     "lib/stibium/bundled.rb",
     "lib/stibium/bundled/bundle.rb",
+    "lib/stibium/bundled/bundle/config.rb",
+    "lib/stibium/bundled/bundle/directory.rb",
     "lib/stibium/bundled/version.rb",
     "lib/stibium/bundled/version.yml",
   ]

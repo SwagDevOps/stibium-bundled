@@ -1,11 +1,26 @@
 # frozen_string_literal: true
 
-require_relative 'lib/stibium-bundled'
-require 'stibium/bundled'
 require 'sys/proc'
-require 'kamaze/project'
 
 Sys::Proc.progname = nil
+
+# coverage ------------------------------------------------------------
+if Gem::Specification.find_all_by_name('simplecov').any?
+  autoload(:YAML, 'yaml')
+  autoload(:SimpleCov, 'simplecov')
+
+  if YAML.safe_load(ENV['coverage'].to_s) == true
+    SimpleCov.start do
+      add_filter 'rake/'
+      add_filter 'spec/'
+    end
+  end
+end
+
+# project -------------------------------------------------------------
+require_relative 'lib/stibium-bundled'
+require 'stibium/bundled'
+require 'kamaze/project'
 
 Kamaze.project do |project|
   project.subject = Stibium::Bundled

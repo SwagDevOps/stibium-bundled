@@ -9,9 +9,6 @@
 require_relative '../bundled'
 require 'kamaze/version'
 
-module Stibium::Bundled
-  # Version
-  #
-  # @type [Kamaze::Version]
-  VERSION = Kamaze::Version.new.freeze
+Stibium::Bundled.instance_eval do
+  self.const_set(:VERSION, Kamaze::Version.new.freeze)
 end

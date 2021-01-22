@@ -4,5 +4,6 @@ inherit_gem:
     - .rubocop.yml
 AllCops:
   NewCops: disable
+  SuggestExtensions: false
 Naming/FileName:
   Exclude: [ lib/stibium-bundled.rb ]

@@ -19,7 +19,7 @@ group :development do
 
   gem 'listen', '~> 3.1'
   gem 'rake', '~> 13.0'
-  gem 'rubocop', '~> 0.66'
+  gem 'rubocop', '~> 1.0'
   gem 'rugged', '~> 1.0'
   gem 'sys-proc', '~> 1.1', '>= 1.1.2'
   # repl ------------------------------------------------------------
@@ -34,7 +34,6 @@ group :doc do
 end
 
 group :test do
-  gem 'concurrent-ruby', '~> 1.1'
   gem 'rspec', '~> 3.8'
-  gem 'sham', '~> 2.0'
+  gem 'simplecov', '~> 0.16'
 end
