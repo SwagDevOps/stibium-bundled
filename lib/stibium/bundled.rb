@@ -17,34 +17,6 @@ end
 # ```ruby
 # # file: lib/awesome_gem.rb
 # module AwesomeGem
-#   Stibium::Bundled.call(self, basedir: "#{__dir__}/..")
-#
-#   bundled&.tap do |bundle|
-#     bundle.standalone! { require 'bundler/setup' if bundle.locked? }
-#   end
-# end
-# ```
-#
-# or:
-#
-# ```ruby
-# # file: lib/awesome_gem.rb
-# module AwesomeGem
-#   include(Stibium::Bundled)
-#
-#   self.bundled_from("#{__dir__}/..") do |bundle|
-#     unless bundle.standalone!
-#       require 'bundler/setup' if bundle.locked?
-#     end
-#   end
-# end
-# ```
-#
-# or simpler:
-#
-# ```ruby
-# # file: lib/awesome_gem.rb
-# module AwesomeGem
 #   include(Stibium::Bundled)
 #
 #   self.bundled_from("#{__dir__}/..", setup: true)
