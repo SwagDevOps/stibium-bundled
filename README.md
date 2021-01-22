@@ -1,16 +1,13 @@
 # ``stibium-bundled`` [![Gem Version](https://badge.fury.io/rb/stibium-bundled.svg)][rubygems:stibium-bundled]
 
-This gem is intended to mimic Bundler's behavior 
-and conform to [bundler configuration options][bundler:config]. 
+This gem is intended to mimic Bundler's behavior and conform to [bundler configuration options][bundler:config].
 
-``stibium-bundled`` detects ``gems.rb`` and ``gems.locked`` 
+``stibium-bundled`` detects ``gems.rb`` and ``gems.locked``
 (or ``Gemfile`` and ``Gemfile.lock``)
 and [``bundler/setup``][bundler:setup] (for [standalone][man:install#options] installation).
 
-``standalone`` makes a bundle that can work __without depending__ on 
-Rubygems or Bundler at runtime. 
-Bundler generates a ``bundler/setup.rb`` file 
-to replace Bundler's own setup in the manner required.
+``standalone`` makes a bundle that can work __without depending__ on Bundler (or Rubygems) at runtime. Bundler generates
+a ``bundler/setup.rb`` file to replace Bundler's own setup in the manner required.
 
 [Configuration settings][bundler:config] are loaded in this order:
 
@@ -29,13 +26,11 @@ require 'stibium/bundled'
 module AwesomeGem
   include(Stibium::Bundled)
 
-  self.bundle("#{__dir__}/..") do |bundle|
-    bundle.standalone! { require 'bundler/setup' if bundle.locked? }
-  end
+  self.bundled_from("#{__dir__}/..", setup: true)
 end
 ```
 
-or even more simple:
+or more concise:
 
 ```ruby
 # file: lib/awesome_gem.rb
@@ -43,9 +38,27 @@ or even more simple:
 require 'stibium/bundled'
 
 module AwesomeGem
-  include(Stibium::Bundled)
+  include(Stibium::Bundled).bundled_from("#{__dir__}/..", setup: true)
+end
+```
 
-  self.bundled_from("#{__dir__}/..", setup: true)
+or load a gem depending on status:
+
+```ruby
+# file: lib/awesome_gem.rb
+
+require 'stibium/bundled'
+
+module AwesomeGem
+  include(Stibium::Bundled).bundled_from("#{__dir__}/..", setup: true) do |bundle|
+    if Object.const_defined?(:Gem) and bundle.locked? and bundle.installed?
+      'foo-bar'.tap do |gem_name|
+        unless bundle.specifications.keep_if { |spec| spec.name == gem_name }.empty?
+          require gem_name.gsub('-', '/')
+        end
+      end
+    end
+  end
 end
 ```
 
