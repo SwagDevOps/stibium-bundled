@@ -88,15 +88,18 @@ module Stibium::Bundled
   protected
 
   # @param basedir [String, Pathname]
-  # @param setup [Boolean]
+  # @param setup [Boolean, Array<Symbol>]
   # @param env [Hash{String => String}]
   # @param ruby_config [Hash{Symbol => Object}]
   #
   # @return [Bundle. nil]
+  #
+  # @see Stibium::Bundled::Bundle#setup
   def bundled_from(basedir, setup: false, env: ENV.to_h, ruby_config: {})
+    # @type [Stibium::Bundled::Bundle] bundle
     Stibium::Bundled.call(self, basedir: basedir, env: env, ruby_config: ruby_config).bundled.tap do |bundle|
       unless bundle.nil?
-        bundle.setup if setup.is_a?(TrueClass)
+        bundle.__send__(:setup, **(setup.is_a?(Array) ? { guards: setup } : {})) if setup
 
         yield(bundle) if block_given?
       end

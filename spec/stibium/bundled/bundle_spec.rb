@@ -36,12 +36,27 @@ describe Stibium::Bundled::Bundle, :'stibium/bundled/bundle' do
     :gemfile,
     :gemfiles,
     :standalone?,
-    :standalone!,
     :specifications,
     :installed?,
     :config,
   ].each do |method|
     it { expect(subject).to respond_to(method).with(0).arguments }
+  end
+end
+describe Stibium::Bundled::Bundle, :'stibium/bundled/bundle' do
+  # @type [String] basedir
+  # @type [Stibium::Bundled::Bundle] subject
+  # @type [Class<Stibium::Bundled::Bundle]>] described_class
+  let(:basedir) { __dir__ }
+  let(:subject) { described_class.new(basedir) }
+
+  [
+    :standalone!,
+    :setup,
+  ].each do |method|
+    context '.protected_methods' do
+      it { expect(subject.protected_methods).to include(method) }
+    end
   end
 end
 
