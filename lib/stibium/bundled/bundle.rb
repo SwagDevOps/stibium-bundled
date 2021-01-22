@@ -24,7 +24,7 @@ class Stibium::Bundled::Bundle
   # @return [Config]
   attr_reader :config
 
-  # @retrun [Directory]
+  # @return [Directory]
   attr_reader :directory
 
   # @param path [String, Pathname]
