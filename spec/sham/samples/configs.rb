@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-autoload(:FileUtils, 'fileutis')
+autoload(:FileUtils, 'fileutils')
 
 results = {
   'BUNDLE_APP_CONFIG' => '.bundle',
