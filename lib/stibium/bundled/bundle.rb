@@ -67,7 +67,7 @@ class Stibium::Bundled::Bundle
   #
   # @return [Array<Gem::Specification>]
   def specifications
-    directory.specifications.map { |file| instance_eval(file.read, file.to_path) }
+    directory.specifications.map { |file| instance_eval(file.read, file.to_path) }.sort_by(&:name)
   end
 
   # Denote install seems to be happened (since specifications are present).
