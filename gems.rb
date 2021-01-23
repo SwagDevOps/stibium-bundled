@@ -9,7 +9,6 @@ source 'https://rubygems.org'
 git_source(:github) { |name| "https://github.com/#{name}.git" }
 
 group :default do
-  gem 'kamaze-version', '~> 1.0'
 end
 
 group :development do
@@ -25,6 +24,8 @@ group :development do
   # repl ------------------------------------------------------------
   gem 'interesting_methods', '~> 0.1'
   gem 'pry', '~> 0.12'
+  # version --------------------------------------------------------
+  gem 'kamaze-version', '~> 1.0'
 end
 
 group :doc do

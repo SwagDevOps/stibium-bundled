@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
     "lib/stibium/bundled/version.yml",
   ]
 
-  s.add_runtime_dependency("kamaze-version", ["~> 1.0"])
+  
 end
 
 # Local Variables:
