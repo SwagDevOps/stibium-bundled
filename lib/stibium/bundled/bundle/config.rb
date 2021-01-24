@@ -27,6 +27,11 @@ require_relative '../bundle'
 # @see .defaults
 class Stibium::Bundled::Bundle::Config < ::Hash
   autoload(:Pathname, 'pathname')
+  autoload(:YAML, 'yaml')
+
+  {
+    Reader: 'reader',
+  }.each { |k, v| autoload(k, "#{__dir__}/config/#{v}") }
 
   # @param basedir [String, Pathname]
   # @param env [Hash{String => String}]
@@ -63,9 +68,6 @@ class Stibium::Bundled::Bundle::Config < ::Hash
   end
 
   class << self
-    autoload(:Pathname, 'pathname')
-    autoload(:YAML, 'yaml')
-
     # Default config values (as seen from an empty environment).
     #
     # ```shell
@@ -114,9 +116,7 @@ class Stibium::Bundled::Bundle::Config < ::Hash
       env['HOME'].yield_self do |home_path|
         return {} if home_path.nil?
 
-        Pathname.new(home_path).expand_path.join('.bundle/config').yield_self do |file|
-          self.read(file, env: env)
-        end
+        Pathname.new(home_path).expand_path.join('.bundle/config').yield_self { |file| self.read(file, env: env) }
       end
     end
 
@@ -143,12 +143,7 @@ class Stibium::Bundled::Bundle::Config < ::Hash
     #
     # @return [Hash{String => Object}]
     def read(file, env: ENV.to_h)
-      return {} if env(source: env).key?('BUNDLE_IGNORE_CONFIG')
-
-      return {} unless file.file? and file.readable?
-
-      (file.read.yield_self { |content| YAML.safe_load(content) })
-        .transform_values { |v| v.is_a?(String) ? YAML.safe_load(v) : v }
+      Reader.new(env: env).read(file)
     end
   end
 end
