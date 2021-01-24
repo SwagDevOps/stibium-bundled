@@ -1,5 +1,14 @@
 # frozen_string_literal: true
 
+# constants ---------------------------------------------------------
+describe Stibium::Bundled::Bundle::Config, :'stibium/bundled/bundle/config' do
+  [
+    :Reader,
+  ].each do |k|
+    it { expect(described_class).to have_constant(k) }
+  end
+end
+
 # class methods -----------------------------------------------------
 describe Stibium::Bundled::Bundle::Config, :'stibium/bundled/bundle/config' do
   # @type [Class<Stibium::Bundled::Bundle::Config>] described_class
