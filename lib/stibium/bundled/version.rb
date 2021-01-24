@@ -19,7 +19,9 @@ Stibium::Bundled.instance_eval do
       lambda do
         require 'kamaze/version'
       rescue LoadError
+        # :nocov:
         version
+        # :nocov:
       else
         Kamaze::Version.new.freeze
       end.tap { |func| self.const_set(:VERSION, func.call) }
