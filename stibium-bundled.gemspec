@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
     "lib/stibium/bundled.rb",
     "lib/stibium/bundled/bundle.rb",
     "lib/stibium/bundled/bundle/config.rb",
+    "lib/stibium/bundled/bundle/config/reader.rb",
     "lib/stibium/bundled/bundle/directory.rb",
     "lib/stibium/bundled/version.rb",
     "lib/stibium/bundled/version.yml",
