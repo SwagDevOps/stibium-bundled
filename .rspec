@@ -1,6 +1,6 @@
 # vim: ft=sh
 
---require ./spec/helper
+--require './spec/helper'
 --color
 --pattern './spec/**/*_spec.rb'
 --order 'rand'
