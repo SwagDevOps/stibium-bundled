@@ -99,9 +99,9 @@ sham!(:'samples/bundles').lister.call.each do |_, sample|
         end
       end
 
-      { bundled: 1, bundled?: 0 }.each do |method, index|
+      { bundled?: 0, bundled: 1, }.each do |method, index|
         context ".#{method}" do
-          it { expect(described_class.public_send(method)).to be_a(sample.results.fetch(index)) }
+          it { expect(described_class.public_send(method)).to be_a(sample.outcome.call(:bundled, index)) }
         end
       end
     end

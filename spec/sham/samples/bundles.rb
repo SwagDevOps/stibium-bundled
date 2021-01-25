@@ -1,12 +1,29 @@
 # frozen_string_literal: true
 
 results = {
-  empty: [FalseClass, NilClass],
-  gemfile: [TrueClass, Stibium::Bundled::Bundle],
-  gemfile_old: [TrueClass, Stibium::Bundled::Bundle],
-  partial: [FalseClass, NilClass],
-  partial_old: [FalseClass, NilClass],
-  standalone: [TrueClass, Stibium::Bundled::Bundle]
+  # results for the following methods:
+  #
+  # 0. Bundled.bundled?
+  # 1. Bundled.bundled
+  bundled: {
+    empty: [FalseClass, NilClass],
+    gemfile: [TrueClass, Stibium::Bundled::Bundle],
+    gemfile_old: [TrueClass, Stibium::Bundled::Bundle],
+    partial: [FalseClass, NilClass],
+    partial_old: [FalseClass, NilClass],
+    standalone: [TrueClass, Stibium::Bundled::Bundle]
+  },
+  # results for the following methods:
+  #
+  # 0. Bundled::Bundle.installed?
+  'bundled/bundle': {
+    empty: [FalseClass],
+    gemfile: [FalseClass],
+    gemfile_old: [FalseClass],
+    partial: [FalseClass],
+    partial_old: [FalseClass],
+    standalone: [FalseClass]
+  }
 }
 
 lister = lambda do
@@ -16,17 +33,20 @@ lister = lambda do
       {
         basedir: fp,
         env: {},
-        results: results.fetch(fp.basename.to_s.to_sym),
+        ruby_config: {
+          engine: 'ruby',
+          version: '2.5.0',
+        },
+        results: results.transform_values { |v| v.fetch(fp.basename.to_s.to_sym) },
       }.tap do |h|
-        h[:builder] = lambda do |base: Class|
-          base.new do
-            class << self
-              include Stibium::Bundled
-            end
-
-            self.bundled_from(fp, env: h.fetch(:env))
-          end
-        end
+        h.merge!({
+                   builder: lambda do |base: Class|
+                     [[fp], { env: h.fetch(:env), ruby_config: h.fetch(:ruby_config) }].yield_self do |args|
+                       base.new { (include Stibium::Bundled).bundled_from(*args.fetch(0), **args.fetch(1)) }
+                     end
+                   end,
+                   outcome: ->(k, index) { h.fetch(:results).fetch(k).fetch(index) },
+                 })
       end.yield_self { |h| Struct.new(*h.keys).new(*h.values) }
     ]
   end.sort.to_h
