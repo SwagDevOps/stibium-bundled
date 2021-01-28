@@ -110,7 +110,7 @@ class Stibium::Bundled::Bundle
   #
   # @return [Boolean]
   def standalone?
-    !!bundler_setup
+    bundler_setup.yield_self { |fp| fp.file? and fp.readable? }
   end
 
   protected
@@ -119,14 +119,14 @@ class Stibium::Bundled::Bundle
   #
   # @return [self]
   #
-  # @raise [Errno::ENOENT]
+  # @raise [Errno::ENOENT, LoadError]
   def standalone!(&fallback)
-    self.tap do
-      # noinspection RubyResolve
-      bundler_setup.tap { |fp| require(fp.realpath) unless fp.nil? }
-    rescue Errno::ENOENT => e
-      fallback ? fallback.call(self) : raise(e)
-    end
+    # noinspection RubyResolve
+    require(bundler_setup.realpath)
+  rescue Errno::ENOENT, LoadError => e
+    fallback ? fallback.call(self) : raise(e)
+  ensure
+    self
   end
 
   # Load standalone setup if present, else fallback to <code>bundler/setup</code>.
@@ -146,12 +146,12 @@ class Stibium::Bundled::Bundle
   # @see https://github.com/ruby/ruby/blob/0e40cc9b194a5e46024d32b85a61e651372a65cb/lib/bundler/setup.rb
   # @see https://github.com/ruby/ruby/blob/69ed64949b0c02d4b195809fa104ff23dd100093/lib/bundler.rb#L11
   # @see https://github.com/ruby/ruby/blob/69ed64949b0c02d4b195809fa104ff23dd100093/lib/bundler/rubygems_integration.rb
-  def setup(guards: [:locked, :installed])
-    self.standalone! do
-      guards.map { |s| self.public_send('%s?' % s.to_s.gsub(/\?$/, '')) }.tap do |results|
-        require 'bundler/setup' if results.uniq == [true]
+  def setup(guards: [:bundled, :installed])
+    self.tap do
+      unless guards.map { |s| self.public_send('%s?' % s.to_s.gsub(/\?$/, '')) }.include?(false)
+        standalone! { require 'bundler/setup' }
       end
-    end.yield_self { self }
+    end
   end
 
   # Standalone setup file.
@@ -166,12 +166,10 @@ class Stibium::Bundled::Bundle
   # @see #standalone!
   # @see https://bundler.io/v2.2/man/bundle-install.1.html#OPTIONS
   #
-  # @return [Pathname, nil]
+  # @return [Pathname]
   def bundler_setup
     Pathname.new(config.fetch('BUNDLE_PATH')).yield_self do |bundle_path|
-      (bundle_path.absolute? ? bundle_path : path.join(bundle_path)).join('bundler/setup.rb').yield_self do |file|
-        (file.file? and file.readable?) ? file : nil # rubocop:disable Style/TernaryParentheses
-      end
+      (bundle_path.absolute? ? bundle_path : path.join(bundle_path)).join('bundler/setup.rb')
     end
   end
 end
