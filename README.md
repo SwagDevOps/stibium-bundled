@@ -1,4 +1,4 @@
-# ``stibium-bundled`` [![Gem Version](https://badge.fury.io/rb/stibium-bundled.svg)][rubygems:stibium-bundled]
+# ``stibium-bundled`` [![Gem Version](https://badge.fury.io/rb/stibium-bundled.svg)][rubygems:stibium-bundled] [![Maintainability](https://api.codeclimate.com/v1/badges/7121242b44c7a3cc4f61/maintainability)](https://codeclimate.com/github/SwagDevOps/stibium-bundled/maintainability)
 
 This gem is intended to mimic Bundler's behavior and conform to [bundler configuration options][bundler:config].
 
