@@ -24,9 +24,9 @@ require 'kamaze/project'
 
 Kamaze.project do |project|
   project.subject = Stibium::Bundled
-  project.name    = 'stibium-bundled'
+  project.name = 'stibium-bundled'
   # noinspection RubyLiteralArrayInspection
-  project.tasks   = [
+  project.tasks = [
     'cs:correct', 'cs:control', 'cs:pre-commit',
     'doc', 'doc:watch',
     'gem', 'gem:install', 'gem:compile',
@@ -41,4 +41,8 @@ if project.path('spec').directory?
   task :spec do |_task, args|
     Rake::Task[:test].invoke(*args.to_a)
   end
+end
+
+%w[lib tasks].each do |dir|
+  Dir.glob("#{__dir__}/rake/#{dir}/*.rb").sort.each { |fp| require fp }
 end

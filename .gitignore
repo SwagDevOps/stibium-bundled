@@ -3,6 +3,7 @@
 *_flymake.*
 *~
 /.*
+/bench/exports/
 /build/
 /cache/
 /coverage/
