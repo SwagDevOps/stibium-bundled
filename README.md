@@ -69,7 +69,7 @@ locate it:
 # file: lib/awesome_gem.rb
 
 module AwesomeGem
-  Pathname.new("#{__dir__}/../..").expand_path.tap do |basedir|
+  Pathname.new("#{__dir__}/..").expand_path.tap do |basedir|
     begin
       require 'stibium/bundled'
     rescue LoadError
@@ -89,7 +89,7 @@ end
 
 ## Benchmarks
 
-Using ``Stibium::Bundled`` setup lead to minor overhead compared to direct require for ``bundler/setup``,
+Using ``Stibium::Bundled`` setup leads to minor overhead compared to direct require for ``bundler/setup``,
 on the other hand ``Stibium::Bundled`` setup is compatible with standalone's bundler setup without code change.
 And ``bundle exec`` is known to be [slow][stackoverflow/running-scripts-with-bundle-exec-is-slow].
 
