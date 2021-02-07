@@ -29,7 +29,7 @@ Kamaze.project do |project|
   project.tasks = [
     'cs:correct', 'cs:control', 'cs:pre-commit',
     'doc', 'doc:watch',
-    'gem', 'gem:install', 'gem:compile',
+    'gem', 'gem:install', 'gem:compile', 'gem:push',
     'misc:gitignore',
     'shell', 'sources:license', 'test', 'version:edit',
   ]
