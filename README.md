@@ -68,13 +68,19 @@ locate it:
 ```ruby
 # file: lib/awesome_gem.rb
 
+autoload(:Pathname, 'pathname')
+autoload(:RbConfig, 'rbconfig')
+
 module AwesomeGem
-  Pathname.new("#{__dir__}/..").expand_path.tap do |basedir|
+  Pathname.new("#{__dir__}/..").expand_path.yield_self do |basedir|
     begin
       require 'stibium/bundled'
     rescue LoadError
-      basedir.join('{**/,}bundle', RUBY_ENGINE, RUBY_VERSION, '{bundler,}/gems/*/stibium-bundled.gemspec').tap do |s|
-        Pathname.glob(s).first&.dirname.tap { |gem_dir| require gem_dir.join('lib/stibium/bundled') }
+      [
+        [RUBY_ENGINE, RbConfig::CONFIG.fetch('ruby_version'), 'bundler/gems/*/stibium-bundled.gemspec'],
+        [RUBY_ENGINE, RbConfig::CONFIG.fetch('ruby_version'), 'gems/stibium-bundled-*/lib/'],
+      ].map { |parts| basedir.join(*['{**/,}bundle'].concat(parts)) }.yield_self do |patterns|
+        Pathname.glob(patterns).first&.dirname.tap { |gem_dir| require gem_dir.join('lib/stibium/bundled') }
       end
     end
 
