@@ -4,10 +4,10 @@
 
 Gem::Specification.new do |s|
   s.name        = "stibium-bundled"
-  s.version     = "0.0.3"
-  s.date        = "2021-01-22"
+  s.version     = "0.0.4"
+  s.date        = "2021-02-07"
   s.summary     = "Denote bundle state"
-  s.description = "Denote bundle state, based on conventions."
+  s.description = "Denote bundle state and (optionally) load bundler/setup according to the configuration."
 
   s.licenses    = ["GPL-3.0"]
   s.authors     = ["Dimitri Arrigoni"]
