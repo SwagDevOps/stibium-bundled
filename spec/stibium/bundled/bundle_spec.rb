@@ -89,3 +89,16 @@ describe Stibium::Bundled::Bundle, :'stibium/bundled/bundle' do
     it { expect(subject.config).to be_frozen }
   end
 end
+
+# samples -----------------------------------------------------------
+sham!(:'samples/bundles').lister.call.each do |_, sample|
+  describe Stibium::Bundled::Bundle, :'stibium/bundled/bundle', :samples do
+    let(:subject) { described_class.new(sample.basedir, env: sample.env, ruby_config: sample.ruby_config) }
+
+    { installed?: 0 }.each do |method, index|
+      context ".#{method}" do
+        it { expect(subject.public_send(method)).to be_a(sample.results.fetch(:'bundled/bundle').fetch(index)) }
+      end
+    end
+  end
+end

@@ -1,12 +1,12 @@
 ---
 major: 0
 minor: 0
-patch: 3
+patch: 4
 authors: ['Dimitri Arrigoni']
 email: 'dimitri@arrigoni.me'
-date: '2021-01-22'
+date: '2021-02-07'
 summary: 'Denote bundle state'
-description: 'Denote bundle state, based on conventions.'
+description: 'Denote bundle state and (optionally) load bundler/setup according to the configuration.'
 homepage: 'https://github.com/SwagDevOps/stibium-bundled'
 licenses: ['GPL-3.0']
 license_header: |

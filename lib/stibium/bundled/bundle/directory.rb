@@ -35,11 +35,14 @@ class Stibium::Bundled::Bundle::Directory
 
   # @return [Array<Pathname>]
   def specifications
-    [ruby_config.fetch(:engine), ruby_config.fetch(:version), 'specifications', '*.gemspec'].yield_self do |parts|
+    [
+      [ruby_config.fetch(:engine), ruby_config.fetch(:version), 'specifications', '*.gemspec'],
+      [ruby_config.fetch(:engine), ruby_config.fetch(:version), 'bundler', 'gems', '*/*.gemspec'],
+    ].map do |parts|
       self.path.join(*parts).yield_self do |s|
         Dir.glob(s).sort.map { |fp| Pathname.new(fp) }.keep_if(&:file?)
       end
-    end
+    end.flatten.sort
   end
 
   protected

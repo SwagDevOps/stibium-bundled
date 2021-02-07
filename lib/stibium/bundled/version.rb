@@ -7,8 +7,24 @@
 # There is NO WARRANTY, to the extent permitted by law.
 
 require_relative '../bundled'
-require 'kamaze/version'
 
 Stibium::Bundled.instance_eval do
-  self.const_set(:VERSION, Kamaze::Version.new.freeze)
+  autoload(:YAML, 'yaml')
+  autoload(:Pathname, 'pathname')
+
+  Pathname.new(__dir__).join('version.yml').tap do |file|
+    YAML.safe_load(file.read).yield_self do |v|
+      %w[major minor patch].map { |key| v.fetch(key) }.join('.')
+    end.tap do |version|
+      lambda do
+        require 'kamaze/version'
+      rescue LoadError
+        # :nocov:
+        version
+        # :nocov:
+      else
+        Kamaze::Version.new.freeze
+      end.tap { |func| self.const_set(:VERSION, func.call) }
+    end
+  end
 end

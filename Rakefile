@@ -17,26 +17,16 @@ if Gem::Specification.find_all_by_name('simplecov').any?
   end
 end
 
-# project -------------------------------------------------------------
+# main ----------------------------------------------------------------
 require_relative 'lib/stibium-bundled'
-require 'stibium/bundled'
-require 'kamaze/project'
 
-Kamaze.project do |project|
-  project.subject = Stibium::Bundled
-  project.name    = 'stibium-bundled'
-  # noinspection RubyLiteralArrayInspection
-  project.tasks   = [
-    'cs:correct', 'cs:control', 'cs:pre-commit',
-    'doc', 'doc:watch',
-    'gem', 'gem:install', 'gem:compile',
-    'misc:gitignore',
-    'shell', 'sources:license', 'test', 'version:edit',
-  ]
-end.load!
+%w[lib tasks].each do |dir|
+  Dir.glob("#{__dir__}/rake/#{dir}/*.rb").sort.each { |fp| require fp }
+end
 
 task default: [:gem]
 
+# @type [Kamaze::Project] project
 if project.path('spec').directory?
   task :spec do |_task, args|
     Rake::Task[:test].invoke(*args.to_a)
