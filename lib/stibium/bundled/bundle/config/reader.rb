@@ -47,6 +47,6 @@ class Stibium::Bundled::Bundle::Config::Reader
 
     return {} unless file.file? and file.readable?
 
-    file.read.yield_self { |content| YAML.safe_load(content) }
+    file.read.yield_self { |content| YAML.safe_load(content) }.tap { |result| result.nil? ? {} : result }
   end
 end
