@@ -41,12 +41,16 @@ class Stibium::Bundled::Bundle::Config::Reader
   #
   # @param file [Pathname]
   #
+  # @raise [RuntimeError]
   # @return [Hash{String => Object}]
   def scrutinize(file)
     return {} if ignore_config?
 
     return {} unless file.file? and file.readable?
 
-    file.read.yield_self { |content| YAML.safe_load(content) }.tap { |result| result.nil? ? {} : result }
+    file.read
+        .yield_self { |content| YAML.safe_load(content) }
+        .yield_self { |result| result.nil? ? {} : result }
+        .tap { |result| raise RuntimeError, "Hash expected, got #{result.class}" unless result.is_a?(Hash) }
   end
 end
