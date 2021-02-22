@@ -39,11 +39,8 @@ class Stibium::Bundled::Bundle
         raise ArgumentError, 'path is not a directory' unless base_path.directory?
       end
 
-      (@config = Config.new(self.path, env: env).freeze).tap do |config|
-        Pathname.new(config.fetch('BUNDLE_PATH')).expand_path.tap do |directory_path|
-          @directory = Directory.new(directory_path, ruby_config: ruby_config)
-        end
-      end
+      @config = Config.new(self.path, env: env).freeze
+      @directory = Directory.new(self.bundle_path, ruby_config: ruby_config).freeze
     end.freeze
   end
 
@@ -154,6 +151,13 @@ class Stibium::Bundled::Bundle
     end
   end
 
+  # @return [Pathname]
+  def bundle_path
+    Pathname.new(config.fetch('BUNDLE_PATH')).yield_self do |bundle_path|
+      (bundle_path.absolute? ? bundle_path : path.join(bundle_path))
+    end
+  end
+
   # Standalone setup file.
   #
   # ``bundle install --standalone[=<list>]`` makes a bundle that can work without depending on
@@ -168,8 +172,6 @@ class Stibium::Bundled::Bundle
   #
   # @return [Pathname]
   def bundler_setup
-    Pathname.new(config.fetch('BUNDLE_PATH')).yield_self do |bundle_path|
-      (bundle_path.absolute? ? bundle_path : path.join(bundle_path)).join('bundler/setup.rb')
-    end
+    bundle_path.join('bundler/setup.rb')
   end
 end
